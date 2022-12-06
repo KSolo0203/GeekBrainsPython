@@ -3,20 +3,18 @@
 # Первый ход делает человек. За один ход можно забрать не более чем 28 конфет.
 # Победитель - тот, кто оставил на столе 0 конфет.
 
-# a) Добавьте игру против бота
-
-# Дополнительно
-# b) Подумайте как наделить бота "интеллектом" (Теория игр)
-
 import os
 import time
 from random import randint
 
-def start_turn():
+def collect_players_names():
+    return [name for name in input('Играют два человека. Введите имена игроков через пробел.\n').split()]
+
+def start_turn(players):
     select = 0
     while select == 0:
         os.system('cls')
-        print('Кто ходит первым?\n1. Я!\n2. Компьютер.\n3. Определить случайным образом.')
+        print(f'Кто ходит первым?\n1. {players[0]}\n2. {players[1]}.\n3. Определить случайным образом.')
         try:
             user_inp = input()
             if user_inp in '12':
@@ -30,16 +28,16 @@ def start_turn():
             else:
                 raise ValueError 
         except ValueError:
-            print(f'Нажите цифру')
+            print(f'Нажмите цифру')
             time.sleep(READING_T)
 
 def rand_start():
     return randint(1,2)
 
-def player_turn():
+def player_turn(player):
     quantity = 0
     while quantity == 0:
-        print(f'Сколько конфет со стола возьмете в этот ход? (не меньше одной и не больше {MAX_QUANTITY})')
+        print(f'{player}, cколько конфет со стола возьмете в этот ход? (не меньше одной и не больше {MAX_QUANTITY})')
         try:
             user_inp = int(input())
             if 0 < user_inp <= MAX_QUANTITY:
@@ -50,7 +48,7 @@ def player_turn():
             else:
                 raise ValueError
         except ValueError:
-            print(f'Введите целое число, большее, чем 0, но не большее, чем {MAX_QUANTITY}.')
+            print(f'{player}, введите целое число, большее, чем 0, но не большее, чем {MAX_QUANTITY}.')
             time.sleep(READING_T)
             os.system('cls')
             global table
@@ -64,7 +62,7 @@ def cpu_turn():
 def turn(player):
     global table
     print(f'На столе конфет: {table}')
-    table -= player_turn() if player else cpu_turn()
+    table -= player_turn(player)
     os.system('cls')
 
 def winner(table):
@@ -72,22 +70,23 @@ def winner(table):
     
 START_QUANTITY = 21
 MAX_QUANTITY = 7
-CPU_T = 1 # задержка на подумать для компьютера 
+CPU_T = 2 # задержка на подумать для компьютера 
 READING_T = 1 # задержка на прочитать для пользователя 
 
 table = START_QUANTITY
+players = collect_players_names()
 
 os.system('cls')
-if start_turn() == 1:
-    turn(1)
+if start_turn(players) == 1:
+    turn(players[0])
 
 while True:
-    turn(0)
+    turn(players[1])
     if winner(table):
-        print('Победил великий компьютер!')
+        print(f'Вы одержали победу, {players[1]}! Помните - избыточное потребелние сахара вредит вашим зубам!')
         break
     
-    turn(1)
+    turn(players[0])
     if winner(table):
-        print('Вы одержали победу! Помните - избыточное потребелние сахара вредит вашим зубам!')
+        print(f'Вы одержали победу, {players[0]}! Помните - избыточное потребелние сахара вредит вашим зубам!')
         break
