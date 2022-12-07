@@ -4,6 +4,7 @@
 # Победитель - тот, кто оставил на столе 0 конфет.
 
 # a) Добавьте игру против бота
+# b) Дополнительно: Подумайте как наделить бота ""интеллектом"" (Теория игр)
 
 import os
 import time
@@ -53,11 +54,29 @@ def player_turn():
             global table
             print(f'На столе конфет: {table}')
 
+# Наипростейший бот, забирающий со стола псевдослучайное количество конфет
+# def cpu_turn():
+#     print('Ход компьютера...')
+#     time.sleep(CPU_T)
+#     return randint(1,MAX_QUANTITY)
+
+# Бот с интеллектом
 def cpu_turn():
     print('Ход компьютера...')
     time.sleep(CPU_T)
-    return randint(1,MAX_QUANTITY)
-
+    for i in range(1, MAX_QUANTITY):
+        if table <= MAX_QUANTITY:
+            return table
+        elif not table / MAX_QUANTITY % 2:
+            return MAX_QUANTITY - 1
+        elif table / MAX_QUANTITY % 2:
+            return MAX_QUANTITY
+        elif (table - i) % (table // (MAX_QUANTITY + 1)) != 0 and \
+             (table // (MAX_QUANTITY)) % 2 != 0:
+            return i
+        else:
+            return randint(1,MAX_QUANTITY)
+    
 def turn(player):
     global table
     print(f'На столе конфет: {table}')
@@ -67,7 +86,7 @@ def turn(player):
 def winner(table):
     return table <= 0
     
-START_QUANTITY = 21
+START_QUANTITY = 35
 MAX_QUANTITY = 7
 CPU_T = 2 # задержка на подумать для компьютера 
 READING_T = 2 # задержка на прочитать для пользователя 
@@ -86,5 +105,5 @@ while True:
     
     turn(1)
     if winner(table):
-        print('Вы одержали победу! Помните - избыточное потребелние сахара вредит вашим зубам!')
+        print('Вы одержали победу! Помните - избыточное потребление сахара вредит вашим зубам!')
         break

@@ -68,7 +68,7 @@ def turn(player):
 def winner(table):
     return table <= 0
     
-START_QUANTITY = 21
+START_QUANTITY = 35
 MAX_QUANTITY = 7
 CPU_T = 2 # задержка на подумать для компьютера 
 READING_T = 1 # задержка на прочитать для пользователя 
@@ -81,12 +81,8 @@ if start_turn(players) == 1:
     turn(players[0])
 
 while True:
-    turn(players[1])
-    if winner(table):
-        print(f'Вы одержали победу, {players[1]}! Помните - избыточное потребелние сахара вредит вашим зубам!')
-        break
-    
-    turn(players[0])
-    if winner(table):
-        print(f'Вы одержали победу, {players[0]}! Помните - избыточное потребелние сахара вредит вашим зубам!')
-        break
+    for player in players:
+        turn(player)
+        if winner(table):
+            print(f'Вы одержали победу, {player}! Игороки, помните - избыточное потребление сахара вредит вашим зубам!')
+            exit()
