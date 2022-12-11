@@ -1,6 +1,5 @@
 #  Создайте программу для игры в "Крестики-нолики".
 
-import numpy as np
 import os
 import time
 from random import randint
@@ -8,112 +7,82 @@ from random import randint
 def collect_players_names():
     return [name.capitalize() for name in input('Играют два человека. Введите имена игроков через пробел.\n').split()]
 
-def Turn():
-    pass
+def interface_grid(field):
+    os.system('cls')
+    print('-' * 13)
+    for i in range(0,int(DEFAULT_GRID ** 0.5)):
+        print(f'| {field[3 * i]} | {field[1 + 3 * i]} | {field[2 + 3 * i]} |')
+    print('-' * 13)
 
 def start_turn(players):
-    select = 0
-    while select == 0:
+    while True:
         os.system('cls')
-        print(f'Кто ходит первым, т.е. крестиками?\n1. {players[0]}\n2. {players[1]}.\n3. Определить случайным образом.')
         try:
-            user_inp = input()
-            if user_inp in '12':
-                select = int(user_inp)
-                time.sleep(READING_T)
-                os.system('cls')
-                return select
-            elif user_inp == '3':
-                select = rand_start()
-                return select
+            user_inp = int(input(f'Кто ходит первым, т.е. крестиками?\n1. {players[0]}\n2. {players[1]}.\n3. Определить случайным образом.\n'))
+            time.sleep(READING_T)
+            if user_inp == 3:
+                user_inp = rand_start()
+            if user_inp == 1:
+                return players
+            elif user_inp == 2:
+                players[1], players[0] = players[0], players[1]
+                return players
             else:
                 raise ValueError 
         except ValueError:
-            print(f'Нажмите цифру')
+            print(f'Нажмите цифру\n')
             time.sleep(READING_T)
 
 def rand_start():
     return randint(1,2)
 
-def player_turn():
-    quantity = 0
-    while quantity == 0:
-        print(f'Сколько конфет со стола возьмете в этот ход? (не меньше одной и не больше {MAX_QUANTITY})')
+def player_turn(player):
+    global grid
+    mark = 'X' if turn_switch == 0 else 'O'
+    while True:
         try:
-            user_inp = int(input())
-            if 0 < user_inp <= MAX_QUANTITY:
-                quantity = user_inp
+            user_inp = int(input((f'Ваш ход, {player}. В какую клетку ставим {mark}?\n')))
+            if 0 < user_inp <= DEFAULT_GRID and grid[user_inp - 1] not in 'XO':
                 time.sleep(READING_T)
-                os.system('cls')
-                return quantity
+                grid[user_inp - 1] = mark
+                break
             else:
                 raise ValueError
         except ValueError:
-            print(f'Введите целое число, большее, чем 0, но не большее, чем {MAX_QUANTITY}.')
+            print(f'Введите цифру от 1 до {DEFAULT_GRID}. При этом клетка должна быть свободна!\n')
             time.sleep(READING_T)
-            os.system('cls')
-            global field
-            print(f'На столе конфет: {field}')
-
-# Наипростейший бот, забирающий со стола псевдослучайное количество конфет
-# def cpu_turn():
-#     print('Ход компьютера...')
-#     time.sleep(CPU_T)
-#     return randint(1,MAX_QUANTITY)
-
-# Бот с интеллектом
-# def cpu_turn():
-#     print('Ход компьютера...')
-#     time.sleep(CPU_T)
-#     for i in range(1, MAX_QUANTITY):
-#         if table <= MAX_QUANTITY:
-#             return table
-#         elif not table / MAX_QUANTITY % 2:
-#             return MAX_QUANTITY - 1
-#         elif table / MAX_QUANTITY % 2:
-#             return MAX_QUANTITY
-#         elif (table - i) % (table // (MAX_QUANTITY + 1)) != 0 and \
-#              (table // (MAX_QUANTITY)) % 2 != 0:
-#             return i
-#         else:
-#             return randint(1,MAX_QUANTITY)
-    
-def turn(player):
-    global field
-    print(f'{field}')
-    player_turn(player)
-    os.system('cls')
+            os.system('cls') 
+            interface_grid(grid)
+            
 
 def winner(field):
-    for i in range(len(field[0])):
-        if all(field[i]) == 'X':
+    for a,b,c in COMBINATIONS:
+        if field[a] == field[b] == field[c]: 
             return True
-        # elif np.all([field[0,0],field[1,1],field[2,2]] == 'X'):
-        #     return True
     return False
 
-START_FIELD = (3,3) #  размер поля
+DEFAULT_GRID = 9 #  размер поля
+COMBINATIONS = [(0,1,2), (3,4,5), (6,7,8), (0,3,6), (1,4,7), (2,5,8), (0,4,8), (2,4,6)]
 READING_T = 2 # задержка на прочитать для пользователя
-CPU_T = 2 # задержка на подумать для компьютера 
 
-field = [['...' for i in range(START_FIELD[0])] for k in range(START_FIELD[1])]
+grid = [str(i) for i in range(1, DEFAULT_GRID + 1)]
 
-print(field)
-print(winner(field))
-field[1][1] = 'X'
-print(field)
-print(winner(field))
+os.system('cls')
+players = start_turn(collect_players_names())
+os.system('cls')
 
+turn_counter = 0
 
-# players = collect_players_names()
-
-# os.system('cls')
-# if start_turn(players) == 1:
-#     turn(players[0])
-
-# while True:
-#     for player in players:
-#         turn(player)
-#         if winner(field):
-#             print(f'Поздравляю, {player}б вы победили!')
-#             exit()
+while True:
+    turn_switch = turn_counter % 2
+    interface_grid(grid)
+    player_turn(players[turn_switch])
+    if winner(grid):
+        interface_grid(grid)
+        print(f'Поздравляю, {players[turn_switch]}, вы победили!\n')
+        exit()
+    if turn_counter == 8:
+        interface_grid(grid)
+        print(f'Победила дружба!\n')
+        exit()
+    turn_counter += 1
