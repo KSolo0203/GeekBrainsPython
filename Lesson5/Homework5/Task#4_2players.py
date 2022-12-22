@@ -8,7 +8,7 @@ import time
 from random import randint
 
 def collect_players_names():
-    return [name for name in input('Играют два человека. Введите имена игроков через пробел.\n').split()]
+    return [name.upper() for name in input('Играют два человека. Введите имена игроков через пробел.\n').split()]
 
 def start_turn(players):
     select = 0
@@ -37,10 +37,10 @@ def rand_start():
 def player_turn(player):
     quantity = 0
     while quantity == 0:
-        print(f'{player}, cколько конфет со стола возьмете в этот ход? (не меньше одной и не больше {MAX_QUANTITY})')
+        print(f'{player}, cколько конфет со стола возьмете в этот ход? (не меньше одной и не больше {min(MAX_QUANTITY, table)})')
         try:
             user_inp = int(input())
-            if 0 < user_inp <= MAX_QUANTITY:
+            if 0 < user_inp <= min(MAX_QUANTITY, table):
                 quantity = user_inp
                 time.sleep(READING_T)
                 os.system('cls')
@@ -48,16 +48,15 @@ def player_turn(player):
             else:
                 raise ValueError
         except ValueError:
-            print(f'{player}, введите целое число, большее, чем 0, но не большее, чем {MAX_QUANTITY}.')
+            print(f'{player}, введите целое число, большее, чем 0, но не большее, чем {min(MAX_QUANTITY, table)}.')
             time.sleep(READING_T)
             os.system('cls')
-            global table
             print(f'На столе конфет: {table}')
 
 def cpu_turn():
     print('Ход компьютера...')
     time.sleep(CPU_T)
-    return randint(1,MAX_QUANTITY)
+    return randint(1, min(MAX_QUANTITY, table))
 
 def turn(player):
     global table
@@ -81,8 +80,11 @@ if start_turn(players) == 1:
     turn(players[0])
 
 while True:
-    for player in players:
-        turn(player)
-        if winner(table):
-            print(f'Вы одержали победу, {player}! Игороки, помните - избыточное потребление сахара вредит вашим зубам!')
-            exit()
+    turn(players[1])
+    if winner(table):
+        print(f'Вы одержали победу, {players[1]}! Игроки, помните - избыточное потребление сахара вредит вашим зубам!')
+        exit()
+    turn(players[0])
+    if winner(table):
+        print(f'Вы одержали победу, {players[0]}! Игроки, помните - избыточное потребление сахара вредит вашим зубам!')
+        exit()

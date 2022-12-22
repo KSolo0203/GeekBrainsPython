@@ -10,90 +10,97 @@ import os
 import time
 from random import randint
 
+def greet():
+    print('Добро пожаловать в игру "Не тот гад, кто съел всё, а тот, кто съел последнее"!')
+    input()
+
 def start_turn():
-    select = 0
-    while select == 0:
+    while 1:
         os.system('cls')
-        print('Кто ходит первым?\n1. Я!\n2. Компьютер.\n3. Определить случайным образом.')
         try:
-            user_inp = input()
-            if user_inp in '12':
-                select = int(user_inp)
-                time.sleep(READING_T)
-                os.system('cls')
-                return select
-            elif user_inp == '3':
-                select = rand_start()
-                return select
-            else:
-                raise ValueError 
+            user_input = int(input('Кто ходит первым?\n1. Я!\n2. Компьютер.\n3. Определить случайным образом.\n'))
+            match user_input:
+                case 1 | 2:
+                    time.sleep(READING_T)
+                    os.system('cls')
+                    return user_input
+                case 3:
+                    return randint(1,2)
+                case _:
+                    raise ValueError 
         except ValueError:
-            print(f'Нажмите цифру')
+            print(f'Нажмите цифру') 
             time.sleep(READING_T)
 
-def rand_start():
-    return randint(1,2)
-
-def player_turn():
-    quantity = 0
-    while quantity == 0:
-        print(f'Сколько конфет со стола возьмете в этот ход? (не меньше одной и не больше {MAX_QUANTITY})')
+def player_turn(player='Игрок'):
+    while 1:
         try:
-            user_inp = int(input())
-            if 0 < user_inp <= MAX_QUANTITY:
-                quantity = user_inp
+            user_inp = int(input(f'{player}, cколько конфет со стола возьмете в этот ход? (не меньше одной и не больше {min(MAX_QUANTITY, table)})\n'))
+            if 0 < user_inp <= min(MAX_QUANTITY, table):
                 time.sleep(READING_T)
                 os.system('cls')
-                return quantity
+                return user_inp
             else:
                 raise ValueError
         except ValueError:
-            print(f'Введите целое число, большее, чем 0, но не большее, чем {MAX_QUANTITY}.')
+            print(f'{player}, введите целое число, большее, чем 0, но не большее, чем {min(MAX_QUANTITY, table)}.')
             time.sleep(READING_T)
             os.system('cls')
-            global table
             print(f'На столе конфет: {table}')
 
-# Наипростейший бот, забирающий со стола псевдослучайное количество конфет
+def candies_word(quantity, padej):
+    if padej == 1: # конфетки берет компьютер
+        if quantity % 10 == 1 and quantity != 11:
+            return 'конфету'
+        elif quantity % 10 in [2,3,4] and quantity not in [12,13,14]:
+            return 'конфеты'
+        else:
+            return 'конфет'
+    else: # просто конфетки лежат
+        if quantity % 10 == 1 and quantity != 11:
+            return 'конфета'
+        elif quantity % 10 in [2,3,4] and quantity not in [12,13,14]:
+            return 'конфеты'
+        else:
+            return 'конфет'
+
+# # Наипростейший бот, забирающий со стола псевдослучайное количество конфет
 # def cpu_turn():
 #     print('Ход компьютера...')
 #     time.sleep(CPU_T)
-#     return randint(1,MAX_QUANTITY)
+#     cpu_has_taken = randint(1, min(MAX_QUANTITY,table))
+#     print(f'Компьютер взял {cpu_has_taken} {candies_word(cpu_has_taken, 1)}.')
+#     time.sleep(READING_T)
+#     return cpu_has_taken
 
-# Бот с интеллектом
+# Непобедимый бот, если ходит первым
 def cpu_turn():
     print('Ход компьютера...')
     time.sleep(CPU_T)
-    for i in range(1, MAX_QUANTITY):
-        if table <= MAX_QUANTITY:
-            return table
-        elif not table / MAX_QUANTITY % 2:
-            return MAX_QUANTITY - 1
-        elif table / MAX_QUANTITY % 2:
-            return MAX_QUANTITY
-        elif (table - i) % (table // (MAX_QUANTITY + 1)) != 0 and \
-             (table // (MAX_QUANTITY)) % 2 != 0:
-            return i
-        else:
-            return randint(1,MAX_QUANTITY)
+    cpu_has_taken = table % (MAX_QUANTITY + 1) if table % (MAX_QUANTITY + 1) != 0 else randint(1, min(MAX_QUANTITY,table))
+    print(f'Компьютер взял {cpu_has_taken} {candies_word(cpu_has_taken, 1)}.')
+    time.sleep(READING_T)
+    return cpu_has_taken
     
 def turn(player):
     global table
-    print(f'На столе конфет: {table}')
+    print(f'На столе {table} {candies_word(table, 0)}.')
     table -= player_turn() if player else cpu_turn()
     os.system('cls')
 
 def winner(table):
     return table <= 0
     
-START_QUANTITY = 35
-MAX_QUANTITY = 7
+START_QUANTITY = 45 # проверить, чтобы START_QUANTITY % (MAX_QUANTITY + 1) != 0
+MAX_QUANTITY = 10
 CPU_T = 2 # задержка на подумать для компьютера 
 READING_T = 2 # задержка на прочитать для пользователя 
 
 table = START_QUANTITY
 
 os.system('cls')
+greet()
+
 if start_turn() == 1:
     turn(1)
 
@@ -102,7 +109,6 @@ while True:
     if winner(table):
         print('Победил великий компьютер!')
         break
-    
     turn(1)
     if winner(table):
         print('Вы одержали победу! Помните - избыточное потребление сахара вредит вашим зубам!')
