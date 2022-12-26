@@ -1,0 +1,19 @@
+Tic_tac_toe_game/
+Lection*/
+Seminar*/
+
+# Byte-compiled / optimized / DLL files
+__pycache__\
+*.py[cod]
+
+# Images & other satellite files
+*.jpg
+*.jpeg
+*.svg
+*.png
+*.bmp
+*.drawio
+*.txt
+*.csv
+
+token.txt
