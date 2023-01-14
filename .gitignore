@@ -17,3 +17,6 @@ __pycache__\
 *.csv
 
 token.txt
+Get_last_candy_bot.py
+config.py
+color_console_letters.py
